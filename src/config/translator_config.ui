@@ -58,6 +58,37 @@
         </property>
        </widget>
       </item>
+      <item row="2" column="0">
+       <widget class="QLabel" name="label_target">
+        <property name="text">
+         <string>Default target language</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="1">
+       <widget class="QComboBox" name="targetLanguage">
+        <property name="toolTip">
+         <string>Will be used when a trigger phrase is typed without a target language.</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="0">
+       <widget class="QLabel" name="label_trigger_phrases">
+        <property name="text">
+         <string>Trigger phrases</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="1">
+       <widget class="QLineEdit" name="triggerPhrases">
+        <property name="toolTip">
+         <string>Comma-separated prefixes that select the default target language. Example: tr, translate</string>
+        </property>
+        <property name="placeholderText">
+         <string>tr, translate</string>
+        </property>
+       </widget>
+      </item>
      </layout>
     </widget>
    </item>

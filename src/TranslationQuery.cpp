@@ -41,7 +41,7 @@ TranslationQuery::TranslationQuery(LanguageRepository *repository)
 }
 
 bool TranslationQuery::isValid() const {
-    if (text.isNull()) return false;
+    if (text.isEmpty()) return false;
     if (sourceLanguage == INVALID) return false;
     if (targetLanguage == INVALID) return false;
     return true;

@@ -42,10 +42,6 @@ Translator::Translator(QObject *parent, const KPluginMetaData &metaData)
                          QStringLiteral("media-playback-start"),
                          QStringLiteral("Play audio"));
     actions = {copy, play};
-    addSyntax(KRunner::RunnerSyntax(QString::fromLatin1("%1:q:").arg(i18n("<language code>")),
-                                     i18n("Translates the word(s) :q: into target language")));
-    addSyntax(KRunner::RunnerSyntax(QString::fromLatin1("%1:q:").arg(i18n("<source language>-<target language>")),
-                                     i18n("Translates the word(s) :q: from the source into target language")));
     languages.initialize();
     parser.setRepository(&languages);
 }
@@ -97,9 +93,40 @@ void Translator::reloadConfiguration() {
     engines.clear();
     auto grp = config();
     QString defaultLanguageAbbreviation = grp.readEntry(CONFIG_PRIMARY, QStringLiteral("en"));
-    QString alternativeDefaultLanguageAbbreviation = grp.readEntry(CONFIG_SECONDARY, QStringLiteral("es"));
+    QString alternativeDefaultLanguageAbbreviation = grp.readEntry(CONFIG_SECONDARY, QStringLiteral("de"));
+    QString defaultTargetLanguageAbbreviation = grp.readEntry(CONFIG_TARGET, QStringLiteral("de"));
     defaultLanguage = languages.getSupportedLanguage(defaultLanguageAbbreviation);
     alternativeDefaultLanguage = languages.getSupportedLanguage(alternativeDefaultLanguageAbbreviation);
+    defaultTargetLanguage = languages.getSupportedLanguage(defaultTargetLanguageAbbreviation);
+    if (defaultLanguage == INVALID) {
+        defaultLanguage = languages.getSupportedLanguage(QStringLiteral("en"));
+    }
+    if (alternativeDefaultLanguage == INVALID) {
+        alternativeDefaultLanguage = defaultLanguage;
+    }
+    if (defaultTargetLanguage == INVALID) {
+        defaultTargetLanguage = defaultLanguage;
+    }
+
+    const QStringList triggerPhrases = grp.readEntry(CONFIG_TRIGGER_PHRASES, defaultTriggerPhrases());
+    parser.setTriggerPhrases(triggerPhrases);
+    parser.setDefaultTargetLanguage(defaultTargetLanguage);
+
+    QList<KRunner::RunnerSyntax> syntaxes;
+    for (const QString &trigger : triggerPhrases) {
+        syntaxes.append(KRunner::RunnerSyntax(QStringLiteral("%1 :q:").arg(trigger),
+                                              i18n("Translates the word(s) :q: into the default target language")));
+        syntaxes.append(KRunner::RunnerSyntax(QStringLiteral("%1 <target language> :q:").arg(trigger),
+                                              i18n("Translates the word(s) :q: into the given target language")));
+        syntaxes.append(KRunner::RunnerSyntax(QStringLiteral("%1 <source language>-<target language> :q:").arg(trigger),
+                                              i18n("Translates the word(s) :q: from the source into target language")));
+    }
+    syntaxes.append(KRunner::RunnerSyntax(QString::fromLatin1("%1 :q:").arg(i18n("<language code>")),
+                                         i18n("Translates the word(s) :q: into target language")));
+    syntaxes.append(KRunner::RunnerSyntax(QString::fromLatin1("%1 :q:").arg(i18n("<source language>-<target language>")),
+                                         i18n("Translates the word(s) :q: from the source into target language")));
+    setSyntaxes(syntaxes);
+
     m_baiduAPPID = grp.readEntry(CONFIG_BAIDU_APPID, QStringLiteral(""));
     m_baiduAPIKey = grp.readEntry(CONFIG_BAIDU_APIKEY, QStringLiteral(""));
     m_youdaoAPPID = grp.readEntry(CONFIG_YOUDAO_APPID, QStringLiteral(""));

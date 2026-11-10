@@ -74,6 +74,16 @@ add_test(NAME translator_test COMMAND translator_test)
 
 target_link_libraries(translator_test PRIVATE Qt6::Test)
 
+add_executable(parser_test
+        test/ParserTest.cpp
+        src/Parser.cpp
+        src/TranslationQuery.cpp
+        src/language/LanguageRepository.cpp
+        src/language/Language.cpp)
+target_include_directories(parser_test PRIVATE ${CMAKE_SOURCE_DIR})
+target_link_libraries(parser_test PRIVATE Qt6::Core Qt6::Test)
+add_test(NAME parser_test COMMAND parser_test)
+
 # ── Packaging (CPack) ──────────────────────────────────────────────────────────
 set(CPACK_PACKAGE_NAME "krunner-translator")
 # Keep the default in sync with "Version" in src/plasma-runner-translator.json for local/manual builds.

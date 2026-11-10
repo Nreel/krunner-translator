@@ -110,6 +110,26 @@ For being able to use Youdao and Baidu, an API key is required. You have to obta
 
 A list of all language codes you can find [here](https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes).
 
+### Search preferences
+
+Open the runner settings with the configure button next to *Translator* in KRunner (or *System Settings → Search → Plasma Search → Translator*). The following search preferences are available:
+
+- **Default source language** – used when no source language is typed (default: *English*).
+- **Alternative source language** – used when the target language equals the default source language, so that typing only the target language translates from the other language (default: *German*).
+- **Default target language** – used by queries that start with a trigger phrase and do not name a target language (default: *German*).
+- **Trigger phrases** – comma-separated prefixes that opt into translation without typing a language code (default: `tr, transl, translate`). Matching is case-insensitive and only matches whole words. `tr` shadows the Turkish language code; remove it if you translate into Turkish often.
+
+### Trigger phrases
+
+Syntax: `<trigger> <searchterm>` or `<trigger> <targetlang> <searchterm>` or `<trigger> <sourcelang>-<targetlang> <searchterm>`
+
+With the default settings (`tr`, source *en*, target *de*):
+
+*tr hello* → *en-de hello*
+*tr es hola* → *en-es hola*
+*tr en es hello* → *en-es hello*
+*tr en-de house* → *en-de house*
+
 ### Specify source and target language
 
 Syntax: `<sourcelang>-<targetlang> <searchterm>`

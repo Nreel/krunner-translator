@@ -27,6 +27,19 @@
 
 K_PLUGIN_CLASS_WITH_JSON(TranslatorConfig, "kcm_krunner_translator.json")
 
+namespace {
+QStringList parseTriggerPhrases(const QString &text) {
+    QStringList phrases;
+    for (const QString &rawPhrase : text.split(QLatin1Char(','))) {
+        const QString phrase = rawPhrase.trimmed();
+        if (!phrase.isEmpty() && !phrases.contains(phrase, Qt::CaseInsensitive)) {
+            phrases.append(phrase);
+        }
+    }
+    return phrases;
+}
+}
+
 TranslatorConfigForm::TranslatorConfigForm(QWidget *parent) : QWidget(parent) {
     setupUi(this);
 }
@@ -45,10 +58,13 @@ TranslatorConfig::TranslatorConfig(QObject *parent, const KPluginMetaData &metaD
         QVariant variant = QVariant::fromValue<Language>(language);
         m_ui->primaryLanguage->addItem(language.getCombinedName(), variant);
         m_ui->secondaryLanguage->addItem(language.getCombinedName(), variant);
+        m_ui->targetLanguage->addItem(language.getCombinedName(), variant);
     }
 
     connect(m_ui->primaryLanguage, &QComboBox::currentTextChanged, this, [this]() { setNeedsSave(true); });
     connect(m_ui->secondaryLanguage, &QComboBox::currentTextChanged, this, [this]() { setNeedsSave(true); });
+    connect(m_ui->targetLanguage, &QComboBox::currentTextChanged, this, [this]() { setNeedsSave(true); });
+    connect(m_ui->triggerPhrases, &QLineEdit::textChanged, this, [this]() { setNeedsSave(true); });
     connect(m_ui->baiduAPPID, &QLineEdit::textChanged, this, [this]() { setNeedsSave(true); });
     connect(m_ui->baiduApiKey, &QLineEdit::textChanged, this, [this]() { setNeedsSave(true); });
     connect(m_ui->youdaoAPPID, &QLineEdit::textChanged, this, [this]() { setNeedsSave(true); });
@@ -75,11 +91,15 @@ void TranslatorConfig::load() {
     grp = KConfigGroup(&grp, QStringLiteral("krunner_translator"));
 
     QString abbrPrimaryLanguage = grp.readEntry(CONFIG_PRIMARY, QStringLiteral("en"));
-    QString abbrSecondaryLanguage = grp.readEntry(CONFIG_SECONDARY, QStringLiteral("es"));
+    QString abbrSecondaryLanguage = grp.readEntry(CONFIG_SECONDARY, QStringLiteral("de"));
+    QString abbrTargetLanguage = grp.readEntry(CONFIG_TARGET, QStringLiteral("de"));
     QString textPrimaryLanguage = languages.getCombinedName(abbrPrimaryLanguage);
     QString textSecondaryLanguage = languages.getCombinedName(abbrSecondaryLanguage);
+    QString textTargetLanguage = languages.getCombinedName(abbrTargetLanguage);
     m_ui->primaryLanguage->setCurrentText(textPrimaryLanguage);
     m_ui->secondaryLanguage->setCurrentText(textSecondaryLanguage);
+    m_ui->targetLanguage->setCurrentText(textTargetLanguage);
+    m_ui->triggerPhrases->setText(grp.readEntry(CONFIG_TRIGGER_PHRASES, defaultTriggerPhrases()).join(QStringLiteral(", ")));
     m_ui->baiduAPPID->setText(grp.readEntry(CONFIG_BAIDU_APPID, QStringLiteral("")));
     m_ui->baiduApiKey->setText(grp.readEntry(CONFIG_BAIDU_APIKEY, QStringLiteral("")));
     m_ui->youdaoAPPID->setText(grp.readEntry(CONFIG_YOUDAO_APPID, QStringLiteral("")));
@@ -101,9 +121,12 @@ void TranslatorConfig::save() {
 
     Language primaryLanguage = m_ui->primaryLanguage->currentData().value<Language>();
     Language secondaryLanguage = m_ui->secondaryLanguage->currentData().value<Language>();
+    Language targetLanguage = m_ui->targetLanguage->currentData().value<Language>();
 
     grp.writeEntry(CONFIG_PRIMARY, primaryLanguage.getAbbreviation());
     grp.writeEntry(CONFIG_SECONDARY, secondaryLanguage.getAbbreviation());
+    grp.writeEntry(CONFIG_TARGET, targetLanguage.getAbbreviation());
+    grp.writeEntry(CONFIG_TRIGGER_PHRASES, parseTriggerPhrases(m_ui->triggerPhrases->text()));
     grp.writeEntry(CONFIG_BAIDU_APPID, m_ui->baiduAPPID->text());
     grp.writeEntry(CONFIG_BAIDU_APIKEY, m_ui->baiduApiKey->text());
     grp.writeEntry(CONFIG_YOUDAO_APPID, m_ui->youdaoAPPID->text());

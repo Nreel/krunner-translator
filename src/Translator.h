@@ -40,6 +40,7 @@ private:
     QList<KRunner::Action> actions;
     SupportedLanguage defaultLanguage;
     SupportedLanguage alternativeDefaultLanguage;
+    SupportedLanguage defaultTargetLanguage;
     QString m_baiduAPPID;
     QString m_baiduAPIKey;
     QString m_youdaoAPPID;
